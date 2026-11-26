@@ -9,7 +9,6 @@ import {
 
 import type { Language } from './types';
 import * as store from './storage';
-import { loadLanguage, saveLanguage } from './storage';
 import { tr } from './utils';
 
 // --------------------------------------------------
@@ -101,6 +100,10 @@ interface AppContextType {
 
 const AppContext = createContext<AppContextType | null>(null);
 
+// --------------------------------------------------
+// USE APP HOOK
+// --------------------------------------------------
+
 export function useApp(): AppContextType {
   const ctx = useContext(AppContext);
 
@@ -109,6 +112,28 @@ export function useApp(): AppContextType {
   }
 
   return ctx;
+}
+
+// --------------------------------------------------
+// LOAD SAVED LANGUAGE
+// --------------------------------------------------
+
+function loadLanguage(): Language {
+  try {
+    const savedLanguage = localStorage.getItem('msr_language');
+
+    if (
+      savedLanguage === 'en' ||
+      savedLanguage === 'te' ||
+      savedLanguage === 'hi'
+    ) {
+      return savedLanguage;
+    }
+
+    return 'en';
+  } catch {
+    return 'en';
+  }
 }
 
 // --------------------------------------------------
@@ -135,7 +160,9 @@ function parseHash(): Route {
   }
 
   // Admin module routes
-  const adminModuleMatch = hash.match(/^\/admin\/module\/([^/?]+)/);
+  const adminModuleMatch = hash.match(
+    /^\/admin\/module\/([^/?]+)/
+  );
 
   if (adminModuleMatch) {
     const moduleName = decodeURIComponent(adminModuleMatch[1]);
@@ -324,7 +351,8 @@ export function AppProvider({
 }) {
   const [route, setRoute] = useState<Route>(parseHash);
 
-  const [lang, setLangState] = useState<Language>(loadLanguage());
+  // GLOBAL LANGUAGE STATE
+  const [lang, setLangState] = useState<Language>(loadLanguage);
 
   const [location, setLocationState] = useState<string>(
     store.loadLocation()
@@ -342,7 +370,10 @@ export function AppProvider({
 
   const [toast, setToast] = useState<string | null>(null);
 
-  // Listen to browser URL changes
+  // --------------------------------------------------
+  // LISTEN TO BROWSER URL CHANGES
+  // --------------------------------------------------
+
   useEffect(() => {
     const onHash = () => {
       setRoute(parseHash());
@@ -355,10 +386,17 @@ export function AppProvider({
     };
   }, []);
 
-  // Scroll to top after navigation
+  // --------------------------------------------------
+  // SCROLL TO TOP AFTER NAVIGATION
+  // --------------------------------------------------
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [route]);
+
+  // --------------------------------------------------
+  // NAVIGATION
+  // --------------------------------------------------
 
   const navigate = useCallback((r: Route) => {
     const nextHash = routeToHash(r);
@@ -370,25 +408,46 @@ export function AppProvider({
     }
   }, []);
 
-  // Language
+  // --------------------------------------------------
+  // GLOBAL LANGUAGE HANDLING
+  // --------------------------------------------------
+
   const setLang = useCallback((l: Language) => {
+    if (l !== 'en' && l !== 'te' && l !== 'hi') {
+      return;
+    }
+
     setLangState(l);
-    saveLanguage(l);
+
+    try {
+      localStorage.setItem('msr_language', l);
+    } catch (error) {
+      console.error('Unable to save language preference:', error);
+    }
   }, []);
 
-  // Location
+  // --------------------------------------------------
+  // LOCATION
+  // --------------------------------------------------
+
   const setLocation = useCallback((l: string) => {
     setLocationState(l);
     store.saveLocation(l);
   }, []);
 
-  // District
+  // --------------------------------------------------
+  // DISTRICT
+  // --------------------------------------------------
+
   const setDistrict = useCallback((d: string) => {
     setDistrictState(d);
     store.saveDistrict(d);
   }, []);
 
-  // User and reporter session
+  // --------------------------------------------------
+  // USER AND REPORTER SESSION
+  // --------------------------------------------------
+
   const refreshSession = useCallback(() => {
     setSession(store.loadSession());
   }, []);
@@ -399,7 +458,10 @@ export function AppProvider({
     navigate({ name: 'home' });
   }, [navigate]);
 
-  // Admin login - frontend demo
+  // --------------------------------------------------
+  // ADMIN LOGIN - FRONTEND DEMO
+  // --------------------------------------------------
+
   const adminLogin = useCallback(
     (email: string, password: string): boolean => {
       const validEmail = 'admin@msrnews.com';
@@ -429,13 +491,20 @@ export function AppProvider({
     []
   );
 
+  // --------------------------------------------------
+  // ADMIN LOGOUT
+  // --------------------------------------------------
+
   const adminLogout = useCallback(() => {
     localStorage.removeItem('msr_demo_admin_session');
     setAdminSession(null);
     navigate({ name: 'adminLogin' });
   }, [navigate]);
 
-  // Toast notification
+  // --------------------------------------------------
+  // TOAST NOTIFICATION
+  // --------------------------------------------------
+
   const showToast = useCallback((msg: string) => {
     setToast(msg);
 
@@ -444,19 +513,28 @@ export function AppProvider({
     }, 2800);
   }, []);
 
-  // Current user
+  // --------------------------------------------------
+  // CURRENT USER
+  // --------------------------------------------------
+
   const currentUser =
     session.type === 'user' && session.id
       ? store.loadUsers().find((u) => u.id === session.id) ?? null
       : null;
 
-  // Current reporter
+  // --------------------------------------------------
+  // CURRENT REPORTER
+  // --------------------------------------------------
+
   const currentReporter =
     session.type === 'reporter' && session.id
       ? store.loadReporters().find((r) => r.id === session.id) ?? null
       : null;
 
-  // Context value
+  // --------------------------------------------------
+  // CONTEXT VALUE
+  // --------------------------------------------------
+
   const ctx: AppContextType = {
     route,
     navigate,

@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { ShieldCheck, KeyRound, RefreshCw, CheckCircle2 } from 'lucide-react';
 import { useApp } from '../context';
-import { AuthShell } from './UserAuth';
+import { AuthShell } from './AuthShared';
 
 const DEMO_OTP = '123456';
 

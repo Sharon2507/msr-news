@@ -27,7 +27,7 @@ export function NotificationsPage() {
   return (
     <div className="max-w-3xl mx-auto px-3 sm:px-6 py-6">
       <div className="bg-white rounded-lg shadow-card overflow-hidden">
-        <div className="bg-news-ink text-white p-5 flex items-center justify-between">
+        <div className="bg-[#003478] text-white p-5 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Bell size={24} />
             <div>
@@ -37,7 +37,7 @@ export function NotificationsPage() {
           </div>
           <div className="flex gap-2">
             <button onClick={markAll} className="text-xs bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded flex items-center gap-1.5" disabled={items.length === 0}><CheckCheck size={14} /> {t('common.markAllRead')}</button>
-            <button onClick={clearAll} className="text-xs bg-white/10 hover:bg-news-red px-3 py-1.5 rounded flex items-center gap-1.5" disabled={items.length === 0}><Trash2 size={14} /> {t('common.clearAll')}</button>
+            <button onClick={clearAll} className="text-xs bg-white/10 hover:bg-news-redDark px-3 py-1.5 rounded flex items-center gap-1.5" disabled={items.length === 0}><Trash2 size={14} /> {t('common.clearAll')}</button>
           </div>
         </div>
 
@@ -51,8 +51,8 @@ export function NotificationsPage() {
             items.map((n) => {
               const meta = TYPE_META[n.type] ?? TYPE_META.announcement;
               return (
-                <div key={n.id} className={`flex items-start gap-3 p-4 border-b border-news-ash hover:bg-news-ash/30 transition-colors ${!n.read ? 'bg-news-red/5' : ''}`}>
-                  <button onClick={() => markRead(n.id)} className={`mt-1 w-5 h-5 rounded-full border-2 shrink-0 flex items-center justify-center transition-colors ${n.read ? 'bg-green-500 border-green-500 text-white' : 'border-news-ash hover:border-news-red'}`} aria-label="Mark read">
+                <div key={n.id} className={`flex items-start gap-3 p-4 border-b border-news-ash hover:bg-news-ash/30 transition-colors ${!n.read ? 'bg-[#003478]/5' : ''}`}>
+                  <button onClick={() => markRead(n.id)} className={`mt-1 w-5 h-5 rounded-full border-2 shrink-0 flex items-center justify-center transition-colors ${n.read ? 'bg-green-500 border-green-500 text-white' : 'border-news-ash hover:border-[#003478]'}`} aria-label="Mark read">
                     {n.read && <Check size={12} />}
                   </button>
                   <div className="flex-1 min-w-0">
@@ -64,7 +64,7 @@ export function NotificationsPage() {
                     <div className="text-sm text-news-slate">{n.body}</div>
                   </div>
                   {n.articleId && (
-                    <button onClick={() => navigate({ name: 'article', id: n.articleId! })} className="shrink-0 text-news-red hover:text-news-redDark" title="Open article">
+                    <button onClick={() => navigate({ name: 'article', id: n.articleId! })} className="shrink-0 text-[#003478] hover:text-news-redDark" title="Open article">
                       <Newspaper size={18} />
                     </button>
                   )}
